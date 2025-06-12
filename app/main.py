@@ -19,15 +19,11 @@ BLACK = (0, 0, 0)
 GRAY = (180, 180, 180)
 DARK_GREEN = (0, 200, 50)
 DARK_RED = (200, 50, 50)
-try:
-    fish_img = pygame.image.load('../source/Boby2.png').convert_alpha()
-except:
-    # Crear un pez temporal si no se encuentra la imagen
-    fish_img = pygame.Surface((50, 30), pygame.SRCALPHA)
-    pygame.draw.ellipse(fish_img, WHITE, [0, 0, 50, 30])
-    pygame.draw.circle(fish_img, (255, 100, 100), [40, 15], 5)  # Ojo
 
-# Escalar si es necesario
+#FISH
+fish_img = pygame.image.load('../juego/assets/Boby2.png').convert_alpha()
+
+# Escalado de fish
 fish_img = pygame.transform.scale(fish_img, (90, 90))
 fish_rect = fish_img.get_rect(center=(100, HEIGHT // 2))
 
@@ -144,7 +140,14 @@ def main_game():
     game_active = True
     
     while True:
+        #background
+        fondo = pygame.image.load("../juego/assets/fondo.jpeg")
+        fondo = pygame.transform.scale(fondo, (WIDTH, HEIGHT))
+        #background por defecto BLUE
         screen.fill(BLUE)
+        #Asignando la img como background
+        screen.blit(fondo,(0,0))
+
         dt = clock.tick(FPS)
         mouse_clicked = False
 
