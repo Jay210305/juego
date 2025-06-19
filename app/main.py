@@ -25,10 +25,10 @@ messages = ["¡YEY  ERES ESPECIAL!", "¡PRO!", "¡SKIBIDI LEVEL!", "¡GOD DEL PE
 current_message = ""
 
 # Audio
-celebration_sound = pygame.mixer.Sound("../assets/audio.wav")
+celebration_sound = pygame.mixer.Sound("../juego/assets/audio.wav")
 
 # Fish
-fish_img_original = pygame.image.load('../assets/Doby.png').convert_alpha()
+fish_img_original = pygame.image.load('../juego/assets/Doby.png').convert_alpha()
 fish_img_original = pygame.transform.scale(fish_img_original, (90, 90))
 fish_img = fish_img_original.copy()
 fish_rect = fish_img.get_rect(center=(100, HEIGHT // 2))
@@ -39,6 +39,8 @@ obstacles = []
 obstacle_width = 80
 gap_height = 200
 obstacle_speed = 4
+tubo_base = pygame.image.load('../juego/assets/tubo.png').convert_alpha()
+alga_base = pygame.image.load('../juego/assets/algas.png').convert_alpha()
 
 # Variables de giro
 dolphin_angle = 0
@@ -48,11 +50,20 @@ rotation_speed = 15
 # Variables para evitar múltiples giros
 last_high_score_celebration = 0
 
+alga_base = pygame.image.load('../juego/assets/algas.png').convert_alpha()
 def spawn_obstacle():
     gap_y = random.randint(100, HEIGHT - 100 - gap_height)
-    top_rect = pygame.Rect(WIDTH, 0, obstacle_width, gap_y)
-    bottom_rect = pygame.Rect(WIDTH, gap_y + gap_height, obstacle_width, HEIGHT)
-    obstacles.append((top_rect, bottom_rect, False))
+    top_height = gap_y
+    bottom_height = HEIGHT - gap_y - gap_height
+    
+    top_rect = pygame.Rect(WIDTH, 0, obstacle_width, top_height)
+    bottom_rect = pygame.Rect(WIDTH, gap_y + gap_height, obstacle_width, bottom_height)
+    
+    # Escalar imágenes al tamaño de los rectángulos
+    top_img = pygame.transform.scale(tubo_base, (obstacle_width, top_height))
+    bottom_img = pygame.transform.scale(alga_base, (obstacle_width, bottom_height))
+    
+    obstacles.append((top_rect, bottom_rect, False, top_img, bottom_img))
 
 # Botones
 class Button:
@@ -154,7 +165,7 @@ def main_game():
 
     obstacle_interval = 1500
     high_score = load_high_score()
-    fondo = pygame.image.load("../assets/fondo.jpeg")
+    fondo = pygame.image.load("../juego/assets/fondo.jpeg")
 
     spawn_timer = 0
     score = 0
@@ -202,11 +213,15 @@ def main_game():
                 spawn_timer = 0
 
             new_obstacles = []
-            for top, bottom, passed in obstacles:
+
+            for obstacle in obstacles:
+                top, bottom, passed, top_img, bottom_img = obstacle
+                
                 top.x -= obstacle_speed
                 bottom.x -= obstacle_speed
-                pygame.draw.rect(screen, GREEN, top)
-                pygame.draw.rect(screen, CORAL, bottom)
+
+                screen.blit(top_img, top)
+                screen.blit(bottom_img, bottom)
 
                 if not passed and top.right < fish_rect.left:
                     score += 1
@@ -231,7 +246,7 @@ def main_game():
                         current_message = random.choice(messages)
 
                 if top.right > 0:
-                    new_obstacles.append((top, bottom, passed))
+                    new_obstacles.append((top, bottom, passed,top_img,bottom_img))
 
                 top_surf = pygame.Surface((top.width, top.height), pygame.SRCALPHA)
                 bottom_surf = pygame.Surface((bottom.width, bottom.height), pygame.SRCALPHA)
@@ -245,9 +260,11 @@ def main_game():
 
             obstacles = new_obstacles
         else:
-            for top, bottom, passed in obstacles:
-                pygame.draw.rect(screen, GREEN, top)
-                pygame.draw.rect(screen, CORAL, bottom)
+            # Dibujar obstáculos sin movimiento
+            for obstacle in obstacles:
+                top, bottom, passed, top_img, bottom_img = obstacle
+                screen.blit(top_img, top)
+                screen.blit(bottom_img, bottom)
 
         score_text = font.render(f"Puntos: {score}", True, WHITE)
         high_score_text = font.render(f"MAX: {high_score}", True, GRAY)
