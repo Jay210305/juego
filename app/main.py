@@ -26,6 +26,7 @@ fish_img = pygame.image.load('../assets/Doby.png').convert_alpha()
 # Escalado de fish
 fish_img = pygame.transform.scale(fish_img, (90, 90))
 fish_rect = fish_img.get_rect(center=(100, HEIGHT // 2))
+fish_mask = pygame.mask.from_surface(fish_img)
 
 # Obstáculos
 obstacles = []  # cada obstáculo será: (top_rect, bottom_rect, passed)
@@ -214,13 +215,26 @@ def main_game():
                     if score % 5 == 0:
                         obstacle_speed += 2
                         if obstacle_interval > 500:
-                            obstacle_interval -= 100  # hace que aparezcan más rápido
+                            obstacle_interval -= 250  # hace que aparezcan más rápido
 
                 if top.right > 0:
                     new_obstacles.append((top, bottom, passed))
 
                 # Colisiones
-                if fish_rect.colliderect(top) or fish_rect.colliderect(bottom):
+                top_surf = pygame.Surface((top.width, top.height), pygame.SRCALPHA)
+                bottom_surf = pygame.Surface((bottom.width, bottom.height), pygame.SRCALPHA)
+
+                pygame.draw.rect(top_surf, (255, 255, 255), (0, 0, top.width, top.height))
+                pygame.draw.rect(bottom_surf, (255, 255, 255), (0, 0, bottom.width, bottom.height))
+
+                top_mask = pygame.mask.from_surface(top_surf)
+                bottom_mask = pygame.mask.from_surface(bottom_surf)
+
+                top_offset = (top.x - fish_rect.x, top.y - fish_rect.y)
+                bottom_offset = (bottom.x - fish_rect.x, bottom.y - fish_rect.y)
+
+                if (fish_mask.overlap(top_mask, top_offset) or
+                        fish_mask.overlap(bottom_mask, bottom_offset)):
                     game_active = False
 
             obstacles = new_obstacles
