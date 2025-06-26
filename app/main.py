@@ -25,10 +25,10 @@ messages = ["¡YEY  ERES ESPECIAL!", "¡PRO!", "¡SKIBIDI LEVEL!", "¡GOD DEL PE
 current_message = ""
 
 # Audio
-celebration_sound = pygame.mixer.Sound("../juego/assets/audio.wav")
+celebration_sound = pygame.mixer.Sound("D:\\Personal\\Semestre_7\\testing\juego\\assets\\audio.wav")
 
 # Fish
-fish_img_original = pygame.image.load('../juego/assets/Doby.png').convert_alpha()
+fish_img_original = pygame.image.load('D:\\Personal\\Semestre_7\\testing\juego\\assets\\Doby.png').convert_alpha()
 fish_img_original = pygame.transform.scale(fish_img_original, (90, 90))
 fish_img = fish_img_original.copy()
 fish_rect = fish_img.get_rect(center=(100, HEIGHT // 2))
@@ -39,8 +39,8 @@ obstacles = []
 obstacle_width = 80
 gap_height = 200
 obstacle_speed = 4
-tubo_base=pygame.image.load('../juego/assets/tubo.png').convert_alpha()
-alga_base = pygame.image.load('../juego/assets/algas.png').convert_alpha()
+tubo_base=pygame.image.load('D:\\Personal\\Semestre_7\\testing\juego\\assets\\tubo.png').convert_alpha()
+alga_base = pygame.image.load('D:\\Personal\\Semestre_7\\testing\juego\\assets\\algas.png').convert_alpha()
 #obstaculo con mask
 tubo_mask = pygame.mask.from_surface(tubo_base)
 alga_mask = pygame.mask.from_surface(alga_base)
@@ -53,7 +53,7 @@ rotation_speed = 15
 # Variables para evitar múltiples giros
 last_high_score_celebration = 0
 
-alga_base = pygame.image.load('../juego/assets/algas.png').convert_alpha()
+alga_base = pygame.image.load('D:\\Personal\\Semestre_7\\testing\juego\\assets\\algas.png').convert_alpha()
 def spawn_obstacle():
     gap_y = random.randint(100, HEIGHT - 100 - gap_height)
     top_height = gap_y
@@ -171,7 +171,7 @@ def main_game():
 
     obstacle_interval = 1500
     high_score = load_high_score()
-    fondo = pygame.image.load("../juego/assets/fondo.jpeg")
+    fondo = pygame.image.load("D:\\Personal\\Semestre_7\\testing\juego\\assets\\fondo.jpeg")
 
     spawn_timer = 0
     score = 0
