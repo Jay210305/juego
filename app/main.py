@@ -8,7 +8,7 @@ WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Skibidi Delfín")
 clock = pygame.time.Clock()
-FPS = 66
+FPS = 60
 
 # Colores
 BLUE = (0, 150, 255)
@@ -39,8 +39,11 @@ obstacles = []
 obstacle_width = 80
 gap_height = 200
 obstacle_speed = 4
-tubo_base = pygame.image.load('../juego/assets/tubo.png').convert_alpha()
+tubo_base=pygame.image.load('../juego/assets/tubo.png').convert_alpha()
 alga_base = pygame.image.load('../juego/assets/algas.png').convert_alpha()
+#obstaculo con mask
+tubo_mask = pygame.mask.from_surface(tubo_base)
+alga_mask = pygame.mask.from_surface(alga_base)
 
 # Variables de giro
 dolphin_angle = 0
@@ -63,7 +66,10 @@ def spawn_obstacle():
     top_img = pygame.transform.scale(tubo_base, (obstacle_width, top_height))
     bottom_img = pygame.transform.scale(alga_base, (obstacle_width, bottom_height))
     
-    obstacles.append((top_rect, bottom_rect, False, top_img, bottom_img))
+    top_mask = pygame.mask.from_surface(top_img)
+    bottom_mask = pygame.mask.from_surface(bottom_img)
+
+    obstacles.append((top_rect, bottom_rect, False,top_img,bottom_img, top_mask, bottom_mask))
 
 # Botones
 class Button:
@@ -215,7 +221,7 @@ def main_game():
             new_obstacles = []
 
             for obstacle in obstacles:
-                top, bottom, passed, top_img, bottom_img = obstacle
+                top, bottom, passed, top_img, bottom_img, top_mask,bottom_mask= obstacle
                 
                 top.x -= obstacle_speed
                 bottom.x -= obstacle_speed
@@ -246,19 +252,15 @@ def main_game():
                         current_message = random.choice(messages)
 
                 if top.right > 0:
-                    new_obstacles.append((top, bottom, passed,top_img,bottom_img))
+                    new_obstacles.append((top, bottom, passed, top_img, bottom_img, top_mask,bottom_mask))
 
-                top_surf = pygame.Surface((top.width, top.height), pygame.SRCALPHA)
-                bottom_surf = pygame.Surface((bottom.width, bottom.height), pygame.SRCALPHA)
-                pygame.draw.rect(top_surf, (255, 255, 255), (0, 0, top.width, top.height))
-                pygame.draw.rect(bottom_surf, (255, 255, 255), (0, 0, bottom.width, bottom.height))
-                top_mask = pygame.mask.from_surface(top_surf)
-                bottom_mask = pygame.mask.from_surface(bottom_surf)
-                if (fish_mask.overlap(top_mask, (top.x - fish_rect.x, top.y - fish_rect.y)) or
-                    fish_mask.overlap(bottom_mask, (bottom.x - fish_rect.x, bottom.y - fish_rect.y))):
-                    game_active = False
+                # Comprobación de colisión con máscaras
+                offset_top = (top.x - fish_rect.x, top.y - fish_rect.y)
+                offset_bottom = (bottom.x - fish_rect.x, bottom.y - fish_rect.y)
+                
+                if fish_mask.overlap(top_mask, offset_top) or fish_mask.overlap(bottom_mask, offset_bottom):                    game_active = False
 
-            obstacles = new_obstacles
+                obstacles = new_obstacles
         else:
             # Dibujar obstáculos sin movimiento
             for obstacle in obstacles:
