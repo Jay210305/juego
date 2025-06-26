@@ -51,7 +51,10 @@ class AssetManager:
             self.assets['fish_img'] = pygame.transform.scale(
                 self.assets['fish_img'], (90, 90)
             )
-            
+            self.assets['icon'] = pygame.image.load(
+                os.path.join(ASSETS_DIR, 'logo.png')
+            ).convert_alpha()
+
             self.assets['tubo_img'] = pygame.image.load(
                 os.path.join(ASSETS_DIR, 'tubo.png')
             ).convert_alpha()
@@ -98,6 +101,7 @@ class Fish:
         self.asset_manager = asset_manager
         self.original_img = asset_manager.get('fish_img').copy()
         self.img = self.original_img.copy()
+        pygame.display.set_icon(self.asset_manager.get('icon'))
         self.rect = self.img.get_rect(center=(100, GameConfig.HEIGHT // 2))
         self.mask = pygame.mask.from_surface(self.img)
         
@@ -238,7 +242,7 @@ class Game:
         # Inicialización
         pygame.init()
         self.screen = pygame.display.set_mode((GameConfig.WIDTH, GameConfig.HEIGHT))
-        pygame.display.set_caption("Skibidi Delfín")
+        pygame.display.set_caption("Skibidi Pescao")
         self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont(None, 36)
         
@@ -276,8 +280,8 @@ class Game:
 
         # Título con sombra
         title_font = pygame.font.SysFont("arialblack", 72)
-        title_surface = title_font.render("SKIBIDI DELFÍN", True, GameConfig.WHITE)
-        shadow_surface = title_font.render("SKIBIDI DELFÍN", True, GameConfig.DARK_BLUE)
+        title_surface = title_font.render("SKIBIDI PESCAO", True, GameConfig.WHITE)
+        shadow_surface = title_font.render("SKIBIDI PESCAO", True, GameConfig.DARK_BLUE)
 
         pulse_scale = 1.0  # para efecto de animación
         scale_direction = 1
