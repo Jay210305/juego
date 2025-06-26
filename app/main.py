@@ -8,6 +8,7 @@ ASSETS_DIR = os.path.join(os.path.dirname(__file__), '..', 'assets')
 
 class GameConfig:
     """Configuración centralizada del juego"""
+    DARK_BLUE = (0, 0, 139)
     WIDTH = 800
     HEIGHT = 600
     FPS = 60
@@ -260,7 +261,82 @@ class Game:
         
         # High score
         self.high_score = self.load_high_score()
-    
+
+    def show_main_menu(self):
+        """Muestra el menú principal con estilo mejorado"""
+        # Botones
+        play_button = Button(
+            GameConfig.WIDTH // 2 - 150, GameConfig.HEIGHT // 2 + 50,
+            140, 50, "Jugar", GameConfig.GREEN, GameConfig.DARK_GREEN
+        )
+        quit_button = Button(
+            GameConfig.WIDTH // 2 + 10, GameConfig.HEIGHT // 2 + 50,
+            140, 50, "Salir", GameConfig.CORAL, GameConfig.DARK_RED
+        )
+
+        # Título con sombra
+        title_font = pygame.font.SysFont("arialblack", 72)
+        title_surface = title_font.render("SKIBIDI DELFÍN", True, GameConfig.WHITE)
+        shadow_surface = title_font.render("SKIBIDI DELFÍN", True, GameConfig.DARK_BLUE)
+
+        pulse_scale = 1.0  # para efecto de animación
+        scale_direction = 1
+
+        running = True
+        while running:
+            mouse_pos = pygame.mouse.get_pos()
+            mouse_clicked = False
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    mouse_clicked = True
+
+            # Fondo
+            background = self.asset_manager.get('background')
+            if background:
+                fondo_scaled = pygame.transform.scale(background, (GameConfig.WIDTH, GameConfig.HEIGHT))
+                self.screen.blit(fondo_scaled, (0, 0))
+            else:
+                self.screen.fill(GameConfig.BLUE)
+
+            # Efecto de escala suave al título
+            pulse_scale += 0.002 * scale_direction
+            if pulse_scale > 1.02 or pulse_scale < 0.98:
+                scale_direction *= -1
+
+            scaled_title = pygame.transform.smoothscale(
+                title_surface,
+                (int(title_surface.get_width() * pulse_scale), int(title_surface.get_height() * pulse_scale))
+            )
+            scaled_shadow = pygame.transform.smoothscale(
+                shadow_surface,
+                (int(shadow_surface.get_width() * pulse_scale), int(shadow_surface.get_height() * pulse_scale))
+            )
+
+            title_x = GameConfig.WIDTH // 2 - scaled_title.get_width() // 2
+            title_y = 100
+
+            self.screen.blit(scaled_shadow, (title_x + 3, title_y + 3))  # sombra
+            self.screen.blit(scaled_title, (title_x, title_y))
+
+            # Botones
+            play_button.check_hover(mouse_pos)
+            quit_button.check_hover(mouse_pos)
+            play_button.draw(self.screen)
+            quit_button.draw(self.screen)
+
+            if play_button.is_clicked(mouse_pos, mouse_clicked):
+                return
+            elif quit_button.is_clicked(mouse_pos, mouse_clicked):
+                pygame.quit()
+                sys.exit()
+
+            pygame.display.flip()
+            self.clock.tick(GameConfig.FPS)
+
     def reset_game_state(self):
         """Resetea el estado del juego"""
         self.obstacles = []
@@ -445,9 +521,51 @@ class Game:
                 return int(f.read())
         except:
             return 0
-    
+
+    def pause_game(self):
+        """Muestra la pantalla de pausa y espera a que el jugador reanude"""
+        paused = True
+        pause_font = pygame.font.SysFont(None, 72)
+        pause_text = pause_font.render("PAUSA", True, GameConfig.WHITE)
+
+        resume_button = Button(
+            GameConfig.WIDTH // 2 - 100, GameConfig.HEIGHT // 2 + 50,
+            200, 50, "Continuar", GameConfig.GREEN, GameConfig.DARK_GREEN
+        )
+
+        while paused:
+            mouse_pos = pygame.mouse.get_pos()
+            mouse_clicked = False
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+                    paused = False
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    mouse_clicked = True
+
+            # Fondo semitransparente
+            overlay = pygame.Surface((GameConfig.WIDTH, GameConfig.HEIGHT), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 180))
+            self.screen.blit(overlay, (0, 0))
+
+            # Texto de pausa
+            self.screen.blit(pause_text, (GameConfig.WIDTH // 2 - pause_text.get_width() // 2, GameConfig.HEIGHT // 3))
+
+            # Botón continuar
+            resume_button.check_hover(mouse_pos)
+            resume_button.draw(self.screen)
+            if resume_button.is_clicked(mouse_pos, mouse_clicked):
+                paused = False
+
+            pygame.display.flip()
+            self.clock.tick(GameConfig.FPS)
+
     def run(self):
         """Bucle principal del juego"""
+        self.show_main_menu()
         while True:
             # Fondo
             background = self.asset_manager.get('background')
@@ -461,6 +579,9 @@ class Game:
 
             # Eventos
             for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
+                    self.pause_game()
+
                 if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                     pygame.quit()
                     return
